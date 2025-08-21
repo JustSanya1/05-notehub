@@ -31,18 +31,16 @@ export default function App() {
     mutationFn:(newNote:InitialFormValues) => createNote(newNote),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['repoData'] });
-      console.log('all good while mutating')
     },
-    onError: () => { console.log('error while mutating') } }
+    onError: () => {} }
   )
   
   const mutationDelete = useMutation({
     mutationFn:(id:string) => deleteNote(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['repoData'] });
-      console.log('all good while mutating')
     },
-    onError: () => { console.log('error while mutating') } }
+    onError: () => {} }
 )
   
   
@@ -106,7 +104,7 @@ export default function App() {
             <NoteList notes={notes} onDelete={onDelete} />
           </>)} 
       
-        
+
   {modalIsOpen && <Modal onSubmit={onSubmit} closeModal={closeModal} handleBackdropClick={handleBackdropClick}/>}
 </div>
 
