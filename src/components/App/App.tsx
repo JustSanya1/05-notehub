@@ -46,10 +46,6 @@ export default function App() {
 		  <button className={css.button} onClick={() => openModal()} >Create note +</button>
       </header>
         
-    {/* {(isFetching || isLoading) ? (<Loader />)
-      : (isError || notes.length === 0)
-        ? (<ErrorMessage />)
-        : ()}  */}
       
         {(isFetching || isLoading) ? (<Loader />)
         : (isError ) ? (<ErrorMessage />)
