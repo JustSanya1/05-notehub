@@ -10,6 +10,7 @@ import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import Loader from '../Loader/Loader';
 import NoteForm from '../NoteForm/NoteForm';
 import { fetchNotes } from '../../services/noteService';
+import NoNotesMessage from '../NoNotesMessage/NoNotesMessage';
 
 export default function App() {
   const [page, setPage] = useState<number>(1);
@@ -18,7 +19,7 @@ export default function App() {
 
 
   const { isLoading, isError, isFetching, data } = useQuery({
-    queryKey: ['repoData', page, query],
+    queryKey: ['notes', page, query],
    queryFn: () => fetchNotes(query, page),
    placeholderData:keepPreviousData,
   })
@@ -45,14 +46,19 @@ export default function App() {
 		  <button className={css.button} onClick={() => openModal()} >Create note +</button>
       </header>
         
-    {(isFetching || isLoading) ? (<Loader />)
+    {/* {(isFetching || isLoading) ? (<Loader />)
       : (isError || notes.length === 0)
         ? (<ErrorMessage />)
-        : (<>
-            <Pagination totalPages={totalPages} page={page} setPage={setPage} /> 
-            <NoteList notes={notes} />
-          </>)} 
+        : ()}  */}
       
+        {(isFetching || isLoading) ? (<Loader />)
+        : (isError ) ? (<ErrorMessage />)
+        : (notes.length === 0) ? (<NoNotesMessage />)
+        : (<>
+          {notes.length > 1 && <Pagination totalPages={totalPages} page={page} setPage={setPage} />} 
+          <NoteList notes={notes} />
+          </>)
+          }
 
   {modalIsOpen && <Modal children={<NoteForm closeModal={closeModal}/>} closeModal={closeModal} />}
 </div>

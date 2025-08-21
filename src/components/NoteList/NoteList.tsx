@@ -12,7 +12,7 @@ export default function NoteList({ notes }: NoteListProps) {
    const mutationDelete = useMutation({
     mutationFn:(id:string) => deleteNote(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['repoData'] });
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
     onError: () => {} }
   )

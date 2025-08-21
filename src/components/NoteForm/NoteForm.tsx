@@ -36,14 +36,15 @@ export default function NoteForm({closeModal}:NoteFormProps) {
     const mutation = useMutation({
     mutationFn:(newNote:InitialFormValues) => createNote(newNote),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['repoData'] });
+        queryClient.invalidateQueries({ queryKey: ['notes'] });
+        closeModal()
     },
     onError: () => {} }
     )
     const onSubmit= (values: InitialFormValues, actions: FormikHelpers<InitialFormValues>) => {
     actions.resetForm()
     mutation.mutate(values)
-    closeModal()
+
   }
     
 return (
