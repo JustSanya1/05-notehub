@@ -1,24 +1,20 @@
-import { useState,useEffect } from 'react'
+import { useState } from 'react'
 import css from './App.module.css'
-import { keepPreviousData, useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import { createNote, deleteNote, fetchNotes } from '../../services/noteService';
+import { keepPreviousData, useQuery} from '@tanstack/react-query';
 import NoteList from '../NoteList/NoteList';
 import Pagination from '../Pagination/Pagination';
 import Modal from '../Modal/Modal';
-import type { FormikHelpers } from 'formik';
-import type { InitialFormValues } from '../../types/form';
 import SearchBox from '../SearchBox/SearchBox';
 import { useDebouncedCallback } from 'use-debounce';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import Loader from '../Loader/Loader';
-
+import NoteForm from '../NoteForm/NoteForm';
+import { fetchNotes } from '../../services/noteService';
 
 export default function App() {
   const [page, setPage] = useState<number>(1);
   const [query, setQuery] = useState<string>('');
   const [modalIsOpen, setModalState] = useState<boolean>(false);
-	const queryClient = useQueryClient();
-
 
 
   const { isLoading, isError, isFetching, data } = useQuery({
@@ -26,65 +22,18 @@ export default function App() {
    queryFn: () => fetchNotes(query, page),
    placeholderData:keepPreviousData,
   })
-
-  const mutation = useMutation({
-    mutationFn:(newNote:InitialFormValues) => createNote(newNote),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['repoData'] });
-    },
-    onError: () => {} }
-  )
-  
-  const mutationDelete = useMutation({
-    mutationFn:(id:string) => deleteNote(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['repoData'] });
-    },
-    onError: () => {} }
-)
-  
   
   const notes = (data && data.notes) ? data.notes : [];  
   const totalPages = (data && data.notes) ? data.totalPages : 0;  
 
-  const onSubmit= (values: InitialFormValues, actions: FormikHelpers<InitialFormValues>) => {
-    actions.resetForm()
-    mutation.mutate(values)
-    closeModal()
-    
-  }
+
   const openModal = () => setModalState(true);
   const closeModal = () => setModalState(false);
-  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      closeModal();
-    }
-  };
-
-  useEffect(() => {
-	const handleKeyDown = (e: KeyboardEvent) => {
-	  if (e.key === "Escape") {
-	    closeModal();
-	  }
-  };
-	document.addEventListener("keydown", handleKeyDown);
-	document.body.style.overflow = "hidden";
-
-	return () => {
-	  document.removeEventListener("keydown", handleKeyDown);
-	  document.body.style.overflow = "";
-	};
-  }, [modalIsOpen]);
-  
-  const  onDelete = (id: string) => {
-    mutationDelete.mutate(id);
-  }
-
 
   const onChange = useDebouncedCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setPage(1)
     setQuery(event.target.value);
   }, 1000)
-
 
 
   return (
@@ -101,11 +50,11 @@ export default function App() {
         ? (<ErrorMessage />)
         : (<>
             <Pagination totalPages={totalPages} page={page} setPage={setPage} /> 
-            <NoteList notes={notes} onDelete={onDelete} />
+            <NoteList notes={notes} />
           </>)} 
       
 
-  {modalIsOpen && <Modal onSubmit={onSubmit} closeModal={closeModal} handleBackdropClick={handleBackdropClick}/>}
+  {modalIsOpen && <Modal children={<NoteForm closeModal={closeModal}/>} closeModal={closeModal} />}
 </div>
 
     </>

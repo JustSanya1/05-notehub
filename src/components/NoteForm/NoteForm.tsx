@@ -3,13 +3,20 @@ import css from './NoteForm.module.css';
 import * as Yup from "yup";
 import type { NoteTag } from '../../types/note';
 import type { InitialFormValues } from '../../types/form';
-import type { NoteFormProps } from '../../types/form';
+import { createNote} from '../../services/noteService';
+import { useMutation } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import type { FormikHelpers } from 'formik';
 
 const initialValues:InitialFormValues = {
     title: "",
     content: "",
     tag: "Todo",
 }
+interface NoteFormProps{
+    closeModal: () => void;
+}
+
 const FormSchema = Yup.object().shape({
     title: Yup.string()
     .min(3, "Title must be at least 3 characters")
@@ -23,8 +30,22 @@ const FormSchema = Yup.object().shape({
 })
 
 
-export default function NoteForm({onSubmit, closeModal}:NoteFormProps) {
+export default function NoteForm({closeModal}:NoteFormProps) {
+    const queryClient = useQueryClient();
 
+    const mutation = useMutation({
+    mutationFn:(newNote:InitialFormValues) => createNote(newNote),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['repoData'] });
+    },
+    onError: () => {} }
+    )
+    const onSubmit= (values: InitialFormValues, actions: FormikHelpers<InitialFormValues>) => {
+    actions.resetForm()
+    mutation.mutate(values)
+    closeModal()
+  }
+    
 return (
 <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={FormSchema}>
     {({ isValid }) => (

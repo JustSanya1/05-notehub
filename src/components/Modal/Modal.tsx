@@ -1,14 +1,35 @@
 import { createPortal } from "react-dom";
 import css from "./Modal.module.css";
-import NoteForm from "../NoteForm/NoteForm";
-import type { NoteFormProps } from '../../types/form';
+import { useEffect } from "react";
 
-interface ModalProps extends NoteFormProps{
-  handleBackdropClick: (e:React.MouseEvent<HTMLDivElement>) => void,
+
+interface ModalProps
+{
+  children: React.ReactNode;
+  closeModal: () => void;
 }
 
-export default function Modal({ onSubmit, closeModal, handleBackdropClick}: ModalProps) {
+export default function Modal({ children, closeModal }: ModalProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeModal();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+  
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+    }, [closeModal]);
 
+    const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget) {
+        closeModal();
+      }
+    };
 
 
     return createPortal(
@@ -19,7 +40,7 @@ export default function Modal({ onSubmit, closeModal, handleBackdropClick}: Moda
   onClick={e => handleBackdropClick(e)}      
 >
   <div className={css.modal}>
-          <NoteForm onSubmit={onSubmit} closeModal={closeModal} />
+    {children}
   </div>
 </div>,
 document.body)
